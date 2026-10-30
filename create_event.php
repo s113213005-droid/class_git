@@ -4,12 +4,10 @@ require 'db.php';
 $error = '';
 $title = '';
 $description = '';
-$eventDate = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $eventDate = trim($_POST['event_date'] ?? '');
 
     if ($title === '') {
         $error = '請輸入活動名稱！';
@@ -18,12 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $stmt = $pdo->prepare(
-                "INSERT INTO events (title, description, event_date) VALUES (?, ?, ?)"
+                "INSERT INTO events (title, description) VALUES (?, ?)"
             );
             $stmt->execute([
                 $title,
-                $description !== '' ? $description : null,
-                $eventDate !== '' ? $eventDate : null
+                $description !== '' ? $description : null
             ]);
 
             header("Location: index.php");
@@ -63,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 15px 0 8px;
             font-weight: bold;
         }
-        input[type="text"], input[type="datetime-local"], textarea {
+        input[type="text"], textarea {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
@@ -123,14 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             maxlength="100"
             value="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>"
             required
-        >
-
-        <label for="event_date">活動日期：</label>
-        <input
-            type="datetime-local"
-            id="event_date"
-            name="event_date"
-            value="<?= htmlspecialchars($eventDate, ENT_QUOTES, 'UTF-8') ?>"
         >
 
         <label for="description">活動內容：</label>
