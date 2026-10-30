@@ -1,7 +1,11 @@
 -- Adminer 5.4.0 PostgreSQL 18.6 dump
 
-DROP TABLE IF EXISTS "events";
+DROP TABLE IF EXISTS "registrations" CASCADE;
+DROP SEQUENCE IF EXISTS registrations_id_seq;
+
+DROP TABLE IF EXISTS "events" CASCADE;
 DROP SEQUENCE IF EXISTS events_id_seq;
+
 CREATE SEQUENCE events_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
 
 CREATE TABLE "public"."events" (
@@ -15,8 +19,6 @@ CREATE TABLE "public"."events" (
 WITH (oids = false);
 
 
-DROP TABLE IF EXISTS "registrations";
-DROP SEQUENCE IF EXISTS registrations_id_seq;
 CREATE SEQUENCE registrations_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
 
 CREATE TABLE "public"."registrations" (
