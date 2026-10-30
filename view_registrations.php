@@ -52,7 +52,7 @@ $registrations = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </table>
 
     <?php if (count($registrations) == 0): ?>
-        <p>目前尚無報名人員。</p>
+        <p>目前尚無人報名。</p>
     <?php endif; ?>
 
     <br>
