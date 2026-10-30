@@ -1,9 +1,9 @@
-
 <?php
 require 'db.php';
 
-// 接收活動 ID
-$eventId = filter_input(INPUT_GET, 'event_id', FILTER_VALIDATE_INT);
+// 接收活動 ID（同時相容 ?event_id=1 與 ?id=1）
+$eventId = filter_input(INPUT_GET, 'event_id', FILTER_VALIDATE_INT)
+        ?: filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$eventId || $eventId <= 0) {
     die("錯誤：未指定有效的活動 ID！");
@@ -21,6 +21,8 @@ if (!$event) {
 }
 
 $error = '';
+$name = '';
+$phone = '';
 
 // 接收報名表單
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,25 +32,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($name === '' || $phone === '') {
         $error = '請完整填寫姓名與聯絡電話！';
+    } elseif (mb_strlen($name) > 50) {
+        $error = '姓名長度不可超過 50 個字！';
+    } elseif (mb_strlen($phone) > 30) {
+        $error = '聯絡電話長度不可超過 30 個字！';
     } else {
+        try {
+            // 寫入報名資料
+            $stmt = $pdo->prepare(
+                "INSERT INTO registrations (event_id, name, phone)
+                 VALUES (?, ?, ?)"
+            );
 
-        // 寫入報名資料
-        $stmt = $pdo->prepare(
-            "INSERT INTO registrations (event_id, name, phone)
-             VALUES (?, ?, ?)"
-        );
+            $stmt->execute([$eventId, $name, $phone]);
 
-        $stmt->execute([$eventId, $name, $phone]);
-
-        echo "<script>
-            alert('報名成功！');
-            window.location.href = 'index.php';
-        </script>";
-        exit;
+            echo "<script>
+                alert('報名成功！');
+                window.location.href = 'index.php';
+            </script>";
+            exit;
+        } catch (PDOException $e) {
+            $error = '報名失敗，資料庫寫入發生錯誤，請稍後再試！';
+        }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -120,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #fff0f0;
             padding: 10px;
             border-radius: 6px;
+            margin-bottom: 15px;
         }
 
         .back {
@@ -161,7 +170,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             id="name"
             name="name"
             placeholder="請輸入姓名"
-            maxlength="100"
+            maxlength="50"
+            value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>"
             required
         >
 
@@ -172,6 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             name="phone"
             placeholder="請輸入聯絡電話"
             maxlength="30"
+            value="<?= htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') ?>"
             required
         >
 
